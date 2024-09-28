@@ -4,8 +4,8 @@
   "description": "* Frontend: React\r * Backend: Node.js with Express\r * Database: PostgreSQL\r * Real-time communication: Socket.io\r * Authentication: JWT (JSON Web Tokens)\r * API: YouTube Data API v3",
   "main": "index.js",
   "scripts": {
-    "start": "node server.js",
-    "server": "nodemon server.js",
+    "start": "node server/server.js",
+    "server": "nodemon server/server.js",
     "client": "npm start --prefix client",
     "dev": "concurrently \"npm run server\" \"npm run client\""
   },
