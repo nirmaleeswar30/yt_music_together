@@ -29,6 +29,15 @@ const roomController = {
     }
   },
 
+  async getAllRooms(req, res) {
+    try {
+      const rooms = await Room.findAll();
+      res.json(rooms);
+    } catch (error) {
+      res.status(500).json({ error: 'Error fetching rooms' });
+    }
+  },
+  
   async getRoom(req, res) {
     try {
       const { roomId } = req.params;
