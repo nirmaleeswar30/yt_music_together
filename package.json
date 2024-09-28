@@ -4,11 +4,11 @@
   "description": "* Frontend: React\r * Backend: Node.js with Express\r * Database: PostgreSQL\r * Real-time communication: Socket.io\r * Authentication: JWT (JSON Web Tokens)\r * API: YouTube Data API v3",
   "main": "index.js",
   "scripts": {
-  "start": "node server.js",
-  "server": "nodemon server.js",
-  "client": "npm start --prefix client",
-  "dev": "concurrently \"npm run server\" \"npm run client\""
-},
+    "start": "node server.js",
+    "server": "nodemon server.js",
+    "client": "npm start --prefix client",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -17,6 +17,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
+    "googleapis": "^144.0.0",
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.13.0",
     "socket.io": "^4.8.0"
