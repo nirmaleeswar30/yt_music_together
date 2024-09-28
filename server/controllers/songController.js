@@ -28,6 +28,9 @@ const songController = {
       const title = video.snippet.title;
       
       const song = await Song.addToQueue(roomId, userId, youtubeId, title);
+      
+      req.io.to(roomId).emit('queueUpdated', await Song.getQueue(roomId));
+
       res.status(201).json(song);
     } catch (error) {
       res.status(500).json({ error: 'Error adding song to queue' });
@@ -51,6 +54,9 @@ const songController = {
       if (!removedSong) {
         return res.status(404).json({ error: 'Song not found in queue' });
       }
+      
+      req.io.to(roomId).emit('queueUpdated', await Song.getQueue(roomId));
+
       res.json(removedSong);
     } catch (error) {
       res.status(500).json({ error: 'Error removing song from queue' });
@@ -63,6 +69,9 @@ const songController = {
       const { newPosition } = req.body;
       await Song.updatePosition(songId, newPosition, roomId);
       const updatedQueue = await Song.getQueue(roomId);
+      
+      req.io.to(roomId).emit('queueUpdated', updatedQueue);
+
       res.json(updatedQueue);
     } catch (error) {
       res.status(500).json({ error: 'Error updating song position' });
@@ -88,6 +97,20 @@ const songController = {
       res.json(videos);
     } catch (error) {
       res.status(500).json({ error: 'Error searching YouTube' });
+    }
+  },
+
+  async updatePlayback(req, res) {
+    try {
+      const { roomId } = req.params;
+      const { currentTime, isPlaying } = req.body;
+      
+      // Emit playback update to all clients in the room except sender
+      req.io.to(roomId).emit('playbackUpdated', { currentTime, isPlaying });
+      
+      res.sendStatus(200);
+    } catch (error) {
+      res.status(500).json({ error: 'Error updating playback' });
     }
   },
 
