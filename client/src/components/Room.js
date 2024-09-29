@@ -43,21 +43,36 @@ function Room({ user }) {
         setSearchResults(response.data);
       } catch (error) {
         console.error('Error searching songs:', error);
+        setError('Failed to search songs. Please try again.');
       }
     };
   
     const addToQueue = async (videoId, title) => {
       try {
         const token = localStorage.getItem('token');
-        await axios.post(`${API_BASE_URL}/songs/${roomId}/queue`, 
+        const response = await axios.post(`${API_BASE_URL}/songs/${roomId}/queue`, 
           { youtubeId: videoId, title },
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        // Refresh the queue after adding a song
-        fetchQueue();
+        console.log('Song added successfully:', response.data);
+        setError(null);
+        fetchQueue(); // Fetch the updated queue immediately
       } catch (error) {
         console.error('Error adding song to queue:', error);
-        setError('Failed to add song to queue. Please try again.');
+        if (error.response) {
+          // The request was made and the server responded with a status code
+          // that falls out of the range of 2xx
+          console.error('Error response:', error.response.data);
+          setError(`Failed to add song to queue: ${error.response.data.error || 'Unknown error'}`);
+        } else if (error.request) {
+          // The request was made but no response was received
+          console.error('Error request:', error.request);
+          setError('Failed to add song to queue: No response from server');
+        } else {
+          // Something happened in setting up the request that triggered an Error
+          console.error('Error message:', error.message);
+          setError(`Failed to add song to queue: ${error.message}`);
+        }
       }
     };
   
@@ -67,9 +82,11 @@ function Room({ user }) {
           await axios.delete(`${API_BASE_URL}/songs/${roomId}/queue/${songId}`, 
               { headers: { Authorization: `Bearer ${token}` } }
           );
-          // The queue will be updated via socket.io
+          setError(null);
+          fetchQueue(); // Fetch the updated queue immediately
       } catch (error) {
-          console.error('Error removing song from queue:', error);
+        console.error('Error removing song from queue:', error);
+        setError('Failed to remove song from queue. Please try again.');
       }
     };
 
@@ -89,47 +106,48 @@ function Room({ user }) {
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setQueue(response.data);
+        setError(null);
       } catch (error) {
         console.error('Error fetching queue:', error);
-      }
-    };
+      setError('Failed to fetch queue. Please try again.');
+    }
+  };
 
     
   
-    return (
+  return (
+    <div>
+      <h2>Room: {roomId}</h2>
+      {error && <p style={{ color: 'red' }}>{error}</p>}
       <div>
-        <h2>Room: {Room.name}</h2>
-        <h2>Room: {roomId}</h2>
-        <div>
-          <h3>Search Songs</h3>
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search for songs"
-          />
-          <button onClick={searchSongs}>Search</button>
-          <ul>
-            {searchResults.map(video => (
-              <li key={video.id}>
-                {video.title}
-                <button onClick={() => addToQueue(video.id, video.title)}>Add to Queue</button>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div>
-          <h3>Queue</h3>
-          {error && <p style={{ color: 'red' }}>{error}</p>}
-          <ul>
-            {queue.map(song => (
-              <li key={song.id}>
-                {song.title}
-                <button onClick={() => removeSong(song.id)}>Remove</button>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <h3>Search Songs</h3>
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search for songs"
+        />
+        <button onClick={searchSongs}>Search</button>
+        <ul>
+          {searchResults.map(video => (
+            <li key={video.id}>
+              {video.title}
+              <button onClick={() => addToQueue(video.id, video.title)}>Add to Queue</button>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div>
+        <h3>Queue</h3>
+        <ul>
+          {queue.map(song => (
+            <li key={song.id}>
+              {song.title}
+              <button onClick={() => removeSong(song.id)}>Remove</button>
+            </li>
+          ))}
+        </ul>
+      </div>
         <div>
           <h3>Now Playing</h3>
           {/* Implement YouTube player here */}

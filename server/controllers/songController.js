@@ -9,8 +9,11 @@ const songController = {
       const { youtubeId } = req.body;
       const userId = req.user.userId;
 
+      console.log(`Adding song to queue. RoomId: ${roomId}, YoutubeId: ${youtubeId}, UserId: ${userId}`);
+
       const room = await Room.findById(roomId);
       if (!room) {
+        console.log(`Room not found: ${roomId}`);
         return res.status(404).json({ error: 'Room not found' });
       }
 
@@ -21,20 +24,33 @@ const songController = {
       });
   
       if (response.data.items.length === 0) {
+        console.log(`YouTube video not found: ${youtubeId}`);
         return res.status(404).json({ error: 'Video not found' });
       }
   
       const video = response.data.items[0];
       const title = video.snippet.title;
       
+      console.log(`Adding song to queue: ${title}`);
       const song = await Song.addToQueue(roomId, userId, youtubeId, title);
-      
-      req.io.to(roomId).emit('queueUpdated', await Song.getQueue(roomId));
+      console.log(`Song added to queue: ${JSON.stringify(song)}`);
 
+      console.log(`Fetching updated queue for room: ${roomId}`);
+      const updatedQueue = await Song.getQueue(roomId);
+      console.log(`Updated queue: ${JSON.stringify(updatedQueue)}`);
+
+      console.log(`Emitting queueUpdated event to room: ${roomId}`);
+      // Check if io is available
+      if (req.app.get('io')) {
+        req.app.get('io').to(roomId).emit('queueUpdated', updatedQueue);
+      } else {
+        console.warn('Socket.IO instance not available');
+      }
+      
       res.status(201).json(song);
     } catch (error) {
-      console.error('Error adding song to queue:', error);
-      res.status(500).json({ error: 'Error adding song to queue' });
+      console.error('Error in addToQueue:', error);
+      res.status(500).json({ error: 'Error adding song to queue', details: error.message });
     }
   },
 
@@ -64,8 +80,13 @@ const songController = {
             return res.status(404).json({ error: 'Song not found in queue' });
         }
         
-        // Emit the updated queue to all users in the room
-        req.io.to(roomId).emit('queueUpdated', await Song.getQueue(roomId));
+        const updatedQueue = await Song.getQueue(roomId);
+       // Check if io is available
+       if (req.app.get('io')) {
+        req.app.get('io').to(roomId).emit('queueUpdated', updatedQueue);
+      } else {
+        console.warn('Socket.IO instance not available');
+      }
 
         res.json(removedSong);
       } catch (error) {
