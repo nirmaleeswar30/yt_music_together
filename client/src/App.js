@@ -14,26 +14,40 @@ const SOCKET_URL = 'http://localhost:5000';
 
 function App() {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [socket, setSocket] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      // Fetch user data here
+      fetchUser();
+    } else {
+      setLoading(false);
     }
-
-    const newSocket = io(SOCKET_URL);
-    setSocket(newSocket);
-
-    return () => newSocket.close();
   }, []);
+
+  const fetchUser = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/auth/me`);
+      setUser(response.data);
+    } catch (error) {
+      console.error('Error fetching user:', error);
+      localStorage.removeItem('token');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogout = () => {
     setUser(null);
     localStorage.removeItem('token');
     delete axios.defaults.headers.common['Authorization'];
   };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <Router>

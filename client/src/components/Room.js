@@ -3,32 +3,32 @@ import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import io from 'socket.io-client';
 
-function Room({ user, socket }) {
-    const [queue, setQueue] = useState([]);
-    const [searchResults, setSearchResults] = useState([]);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [currentSong, setCurrentSong] = useState(null);
-    const [isPlaying, setIsPlaying] = useState(false);
-    const { roomId } = useParams(); // Get roomId from URL
+function Room({ user }) {
+  const [queue, setQueue] = useState([]);
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentSong, setCurrentSong] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [socket, setSocket] = useState(null);
+  const { roomId } = useParams();
 
-    const API_BASE_URL = 'http://localhost:5000/api';
+  const API_BASE_URL = 'http://localhost:5000/api';
   
-    // useEffect(() => {
-    //   if (socket) {
-    //     socket.on('queueUpdated', (updatedQueue) => {
-    //       setQueue(updatedQueue);
-    //     });
-  
-    //     socket.on('playbackUpdated', ({ currentTime, isPlaying }) => {
-    //       // Update video player with new time and play state
-    //     });
-  
-    //     return () => {
-    //       socket.off('queueUpdated');
-    //       socket.off('playbackUpdated');
-    //     };
-    //   }
-    // }, [socket]);
+  useEffect(() => {
+    const newSocket = io('http://localhost:5000');
+    setSocket(newSocket);
+
+    newSocket.emit('joinRoom', roomId);
+
+    newSocket.on('queueUpdated', (updatedQueue) => {
+        setQueue(updatedQueue);
+    });
+
+    return () => {
+        newSocket.emit('leaveRoom', roomId);
+        newSocket.disconnect();
+    };
+  }, [roomId]);;
 
     useEffect(() => {
       if (roomId) {
@@ -65,11 +65,12 @@ function Room({ user, socket }) {
           await axios.delete(`${API_BASE_URL}/songs/${roomId}/queue/${songId}`, 
               { headers: { Authorization: `Bearer ${token}` } }
           );
-          fetchQueue();
+          // The queue will be updated via socket.io
       } catch (error) {
           console.error('Error removing song from queue:', error);
       }
-  };
+    };
+
   
     const updatePlayback = async (currentTime, isPlaying) => {
       try {
@@ -96,6 +97,7 @@ function Room({ user, socket }) {
     return (
       <div>
         <h2>Room: {Room.name}</h2>
+        <h2>Room: {roomId}</h2>
         <div>
           <h3>Search Songs</h3>
           <input

@@ -53,6 +53,9 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use('/api/auth', authRoutes);
+app.use('/api/rooms', roomRoutes);
+app.use('/api/songs', songRoutes);
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
