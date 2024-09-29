@@ -12,28 +12,53 @@
 ## File Structure
 
 ```
-youtube-song-app/
-├── client/
-│   ├── public/
-│   └── src/
-│       ├── components/
-│       ├── pages/
-│       ├── services/
-│       ├── styles/
-│       ├── utils/
+yt_music_together/
+├── client
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── public
+│   │   ├── favicon.ico
+│   │   ├── index.html
+│   │   ├── logo192.png
+│   │   ├── logo512.png
+│   │   ├── manifest.json
+│   │   └── robots.txt
+│   └── src
+│       ├── App.css
 │       ├── App.js
-│       └── index.js
-├── server/
-│   ├── config/
-│   ├── controllers/
-│   ├── models/
-│   ├── routes/
-│   ├── services/
-│   ├── utils/
-│   └── server.js
-├── .gitignore
-├── package.json
-└── README.md
+│       ├── App.test.js
+│       ├── components
+│       │   ├── Login.js
+│       │   ├── Register.js
+│       │   ├── Room.js
+│       │   └── RoomList.js
+│       ├── index.css
+│       ├── index.js
+│       ├── logo.svg
+│       ├── reportWebVitals.js
+│       └── setupTests.js
+├── server
+│   ├── controllers
+│   │   ├── authController.js
+│   │   ├── roomController.js
+│   │   └── songController.js
+│   ├── db.js
+│   ├── middleware
+│   │   └── auth.js
+│   ├── models
+│   │   ├── room.js
+│   │   ├── song.js
+│   │   └── user.js
+│   ├── routes
+│   │   ├── auth.js
+│   │   ├── rooms.js
+│   │   └── songs.js
+│   ├── server.js
+│   └── services
+│       └── youtube.js
+├── README.md
+├── package-lock.json
+└── package.json
 ```
 
 # Tasks Breakdown
