@@ -10,8 +10,13 @@ const Song = {
       RETURNING *
     `;
     const values = [roomId, userId, youtubeId, title];
+    try {
     const result = await db.query(query, values);
     return result.rows[0];
+  } catch (error) {
+    console.error('Database error when adding song to queue:', error);
+      throw error;
+    }
   },
 
   async getQueue(roomId) {
@@ -26,11 +31,17 @@ const Song = {
     return result.rows;
   },
 
-  async removeSong(id, roomId) {
+  async removeSong(songId, roomId) {
     const query = 'DELETE FROM song_queue WHERE id = $1 AND room_id = $2 RETURNING *';
-    const result = await db.query(query, [id, roomId]);
-    return result.rows[0];
+    try {
+        const result = await db.query(query, [songId, roomId]);
+        return result.rows[0];
+    } catch (error) {
+        console.error('Database error when removing song from queue:', error);
+        throw error;
+    }
   },
+
 
   async updatePosition(id, newPosition, roomId) {
     const query = `

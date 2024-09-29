@@ -33,6 +33,7 @@ const songController = {
 
       res.status(201).json(song);
     } catch (error) {
+      console.error('Error adding song to queue:', error);
       res.status(500).json({ error: 'Error adding song to queue' });
     }
   },
@@ -49,19 +50,29 @@ const songController = {
 
   async removeSong(req, res) {
     try {
-      const { roomId, songId } = req.params;
-      const removedSong = await Song.removeSong(songId, roomId);
-      if (!removedSong) {
-        return res.status(404).json({ error: 'Song not found in queue' });
-      }
-      
-      req.io.to(roomId).emit('queueUpdated', await Song.getQueue(roomId));
+        const { roomId, songId } = req.params;
+        
+        // Check if the room exists
+        const room = await Room.findById(roomId);
+        if (!room) {
+            return res.status(404).json({ error: 'Room not found' });
+        }
 
-      res.json(removedSong);
-    } catch (error) {
-      res.status(500).json({ error: 'Error removing song from queue' });
-    }
-  },
+        // Remove the song
+        const removedSong = await Song.removeSong(songId, roomId);
+        if (!removedSong) {
+            return res.status(404).json({ error: 'Song not found in queue' });
+        }
+        
+        // Emit the updated queue to all users in the room
+        req.io.to(roomId).emit('queueUpdated', await Song.getQueue(roomId));
+
+        res.json(removedSong);
+      } catch (error) {
+        console.error('Error removing song from queue:', error);
+        res.status(500).json({ error: 'Error removing song from queue' });
+      }
+    },
 
   async updatePosition(req, res) {
     try {
