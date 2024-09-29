@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import axios from 'axios';
 import io from 'socket.io-client';
-
-// Assume we have these components defined
+import NotFound from './components/NotFound';
 import Login from './components/Login';
 import Register from './components/Register';
 import RoomList from './components/RoomList';
@@ -75,6 +74,7 @@ function App() {
           <Route path="/rooms" element={<RoomList user={user} />} />
           <Route path="/room/:roomId" element={<Room user={user} socket={socket} />} />
           <Route path="/" element={<h1>Welcome to YouTube Song Sharing App</h1>} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
     </Router>
