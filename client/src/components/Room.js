@@ -11,6 +11,7 @@ function Room({ user }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [socket, setSocket] = useState(null);
   const { roomId } = useParams();
+  const [error, setError] = useState(null);
 
   const API_BASE_URL = 'http://localhost:5000/api';
   
@@ -56,6 +57,7 @@ function Room({ user }) {
         fetchQueue();
       } catch (error) {
         console.error('Error adding song to queue:', error);
+        setError('Failed to add song to queue. Please try again.');
       }
     };
   
@@ -118,6 +120,7 @@ function Room({ user }) {
         </div>
         <div>
           <h3>Queue</h3>
+          {error && <p style={{ color: 'red' }}>{error}</p>}
           <ul>
             {queue.map(song => (
               <li key={song.id}>

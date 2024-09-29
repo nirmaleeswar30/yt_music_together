@@ -11,7 +11,10 @@ const Song = {
     `;
     const values = [roomId, userId, youtubeId, title];
     try {
+    console.log('Executing query:', query);
+    console.log('Query values:', values);
     const result = await db.query(query, values);
+    console.log('Query result:', result.rows[0]);
     return result.rows[0];
   } catch (error) {
     console.error('Database error when adding song to queue:', error);
