@@ -1,20 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import axios from 'axios';
-import io from 'socket.io-client';
-import NotFound from './components/NotFound';
 import Login from './components/Login';
 import Register from './components/Register';
 import RoomList from './components/RoomList';
 import Room from './components/Room';
+import NotFound from './components/NotFound';
 
 const API_BASE_URL = 'http://localhost:5000/api';
-const SOCKET_URL = 'http://localhost:5000';
 
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [socket, setSocket] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -72,7 +69,7 @@ function App() {
           <Route path="/login" element={<Login setUser={setUser} />} />
           <Route path="/register" element={<Register setUser={setUser} />} />
           <Route path="/rooms" element={<RoomList user={user} />} />
-          <Route path="/room/:roomId" element={<Room user={user} socket={socket} />} />
+          <Route path="/room/:roomId" element={<Room user={user} />} />
           <Route path="/" element={<h1>Welcome to YouTube Song Sharing App</h1>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
